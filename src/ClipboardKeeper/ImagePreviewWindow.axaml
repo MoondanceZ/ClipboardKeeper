@@ -1,0 +1,82 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ClipboardKeeper.ImagePreviewWindow"
+        Width="900"
+        Height="680"
+        MinWidth="520"
+        MinHeight="380"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent"
+        Title="图片预览">
+  <Window.Styles>
+    <Style Selector="Button">
+      <Setter Property="Width" Value="38" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="MinHeight" Value="34" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Background" Value="#F8FAFC" />
+      <Setter Property="Foreground" Value="#1F334D" />
+      <Setter Property="BorderBrush" Value="#D6E0EC" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="FontSize" Value="18" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button:pointerover">
+      <Setter Property="Background" Value="#FFF1F0" />
+      <Setter Property="BorderBrush" Value="#F0C5C1" />
+      <Setter Property="Foreground" Value="#C13830" />
+    </Style>
+  </Window.Styles>
+
+  <Border x:Name="Surface"
+          CornerRadius="18"
+          ClipToBounds="True"
+          BorderBrush="#D8E1EC"
+          BorderThickness="1"
+          BoxShadow="0 18 34 0 #2D17263B">
+    <Border.Background>
+      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#F8FBFF" Offset="0" />
+        <GradientStop Color="#E9F0F9" Offset="1" />
+      </LinearGradientBrush>
+    </Border.Background>
+
+    <Grid RowDefinitions="66,*">
+      <Grid x:Name="TitleBar"
+            ColumnDefinitions="*,46"
+            Margin="20,16,16,10"
+            Background="Transparent">
+        <StackPanel Spacing="2"
+                    VerticalAlignment="Center">
+          <TextBlock x:Name="TitleText"
+                     FontSize="17"
+                     FontWeight="SemiBold"
+                     Foreground="#1C2739"
+                     TextTrimming="CharacterEllipsis" />
+          <TextBlock Text="图片预览"
+                     FontSize="12"
+                     Foreground="#718096" />
+        </StackPanel>
+        <Button Grid.Column="1"
+                Content="×"
+                Click="CloseButton_Click" />
+      </Grid>
+
+      <Border Grid.Row="1"
+              Margin="20,0,20,20"
+              Padding="14"
+              CornerRadius="16"
+              Background="White"
+              BorderBrush="#DDE6F1"
+              BorderThickness="1">
+        <Image x:Name="PreviewImage"
+               Stretch="Uniform"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch" />
+      </Border>
+    </Grid>
+  </Border>
+</Window>

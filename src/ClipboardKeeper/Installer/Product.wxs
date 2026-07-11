@@ -1,0 +1,89 @@
+<Wix
+  xmlns="http://wixtoolset.org/schemas/v4/wxs"
+  xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package
+    Name="ClipboardKeeper"
+    Manufacturer="ClipboardKeeper"
+    Version="$(var.ProductVersion)"
+    UpgradeCode="b86b1b75-3a7d-41a2-b64f-012b4f2edc52"
+    Scope="perMachine"
+    Codepage="65001">
+
+    <MajorUpgrade
+      AllowSameVersionUpgrades="yes"
+      DowngradeErrorMessage="已安装更新版本的 ClipboardKeeper。" />
+    <MediaTemplate EmbedCab="yes" />
+    <Icon Id="AppIcon.ico" SourceFile="$(var.ProjectDir)\Assets\app.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+    <Property Id="INSTALLFOLDER">
+      <RegistrySearch
+        Id="PreviousInstallDirSearch"
+        Root="HKLM"
+        Key="Software\ClipboardKeeper"
+        Name="InstallDir"
+        Type="raw" />
+    </Property>
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\Installer\License.rtf" />
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="ClipboardKeeper">
+        <Component Id="ClipboardKeeperExe" Guid="*">
+          <File
+            Id="ClipboardKeeperExeFile"
+            Source="$(var.PublishDir)\ClipboardKeeper.exe"
+            KeyPath="yes" />
+          <Shortcut
+            Id="StartMenuShortcut"
+            Directory="ApplicationProgramsFolder"
+            Name="ClipboardKeeper"
+            Description="ClipboardKeeper 剪切板历史工具"
+            WorkingDirectory="INSTALLFOLDER"
+            Icon="AppIcon.ico"
+            Advertise="true" />
+          <RegistryValue
+            Root="HKLM"
+            Key="Software\ClipboardKeeper"
+            Name="InstallDir"
+            Type="string"
+            Value="[INSTALLFOLDER]" />
+        </Component>
+
+        <Component Id="AvaloniaAngleNative" Guid="*">
+          <File Source="$(var.PublishDir)\av_libglesv2.dll" KeyPath="yes" />
+        </Component>
+
+        <Component Id="HarfBuzzNative" Guid="*">
+          <File Source="$(var.PublishDir)\libHarfBuzzSharp.dll" KeyPath="yes" />
+        </Component>
+
+        <Component Id="SkiaNative" Guid="*">
+          <File Source="$(var.PublishDir)\libSkiaSharp.dll" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="ClipboardKeeper">
+        <Component Id="ApplicationProgramsFolderComponent" Guid="49d1f092-a19e-4a7f-8334-a85bb098d4e0">
+          <RemoveFolder Id="RemoveApplicationProgramsFolder" On="uninstall" />
+          <RegistryValue
+            Root="HKCU"
+            Key="Software\ClipboardKeeper"
+            Name="StartMenuFolder"
+            Type="integer"
+            Value="1"
+            KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <Feature Id="MainFeature" Title="ClipboardKeeper" Level="1">
+      <ComponentRef Id="ClipboardKeeperExe" />
+      <ComponentRef Id="AvaloniaAngleNative" />
+      <ComponentRef Id="HarfBuzzNative" />
+      <ComponentRef Id="SkiaNative" />
+      <ComponentRef Id="ApplicationProgramsFolderComponent" />
+    </Feature>
+  </Package>
+</Wix>

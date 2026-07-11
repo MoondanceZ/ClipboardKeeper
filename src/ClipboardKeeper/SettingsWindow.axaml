@@ -1,0 +1,206 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ClipboardKeeper.SettingsWindow"
+        Width="560"
+        Height="574"
+        MinWidth="560"
+        MinHeight="574"
+        MaxWidth="560"
+        MaxHeight="574"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent"
+        CanResize="False"
+        Title="设置">
+  <Window.Styles>
+    <Style Selector="TextBox">
+      <Setter Property="Foreground" Value="#1F334D" />
+      <Setter Property="BorderBrush" Value="#D6E0EC" />
+      <Setter Property="Background" Value="White" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="12,8" />
+    </Style>
+    <Style Selector="TextBox:focus">
+      <Setter Property="BorderBrush" Value="#1769E0" />
+    </Style>
+    <Style Selector="Button">
+      <Setter Property="MinHeight" Value="38" />
+      <Setter Property="Padding" Value="14,7" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Background" Value="#F8FAFC" />
+      <Setter Property="Foreground" Value="#1F334D" />
+      <Setter Property="BorderBrush" Value="#D6E0EC" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button:pointerover">
+      <Setter Property="Background" Value="#EEF6FF" />
+      <Setter Property="BorderBrush" Value="#AFC3DD" />
+    </Style>
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#1769E0" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="BorderBrush" Value="#1769E0" />
+    </Style>
+    <Style Selector="Button.close">
+      <Setter Property="Width" Value="36" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="FontSize" Value="17" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.close:pointerover">
+      <Setter Property="Background" Value="#FFF1F0" />
+      <Setter Property="BorderBrush" Value="#F0C5C1" />
+      <Setter Property="Foreground" Value="#C13830" />
+    </Style>
+    <Style Selector="CheckBox">
+      <Setter Property="Foreground" Value="#1F334D" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="RadioButton">
+      <Setter Property="Foreground" Value="#1F334D" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+  </Window.Styles>
+
+  <Border x:Name="Surface"
+          CornerRadius="18"
+          ClipToBounds="True"
+          Padding="22"
+          Background="#F8FBFF"
+          BorderBrush="#D8E1EC"
+          BorderThickness="1"
+          BoxShadow="0 18 34 0 #2D17263B">
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
+      <Grid x:Name="TitleBar"
+            ColumnDefinitions="*,38"
+            Background="Transparent">
+        <StackPanel Spacing="3"
+                    VerticalAlignment="Center">
+          <TextBlock Text="设置"
+                     FontSize="23"
+                     FontWeight="SemiBold"
+                     Foreground="#1C2739" />
+          <TextBlock Text="调整存储、启动和关闭行为"
+                     FontSize="12"
+                     Foreground="#718096" />
+        </StackPanel>
+        <Button Grid.Column="1"
+                Classes="close"
+                Content="×"
+                Click="CancelButton_Click" />
+      </Grid>
+
+      <StackPanel Grid.Row="1"
+                  Margin="0,18,0,0"
+                  Spacing="12">
+        <Border Padding="14"
+                CornerRadius="14"
+                Background="White"
+                BorderBrush="#DDE6F1"
+                BorderThickness="1">
+          <StackPanel Spacing="12">
+            <TextBlock Text="历史存储"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Foreground="#1C2739" />
+            <Grid ColumnDefinitions="*,10,84">
+              <TextBox x:Name="StorageDirectoryBox"
+                       Grid.Column="0"
+                       PlaceholderText="例如 D:\ClipboardKeeper" />
+              <Button Grid.Column="2"
+                      Content="浏览"
+                      Click="BrowseButton_Click" />
+            </Grid>
+            <Grid ColumnDefinitions="150,34,*,22,*">
+              <StackPanel Spacing="6">
+                <TextBlock Text="保存条数"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Foreground="#536174" />
+                <TextBox x:Name="MaxItemsBox"
+                         PlaceholderText="500" />
+              </StackPanel>
+              <CheckBox x:Name="SaveImagesBox"
+                        Grid.Column="2"
+                        Margin="0,20,0,0"
+                        VerticalAlignment="Center"
+                        Content="保存剪切板图片" />
+              <CheckBox x:Name="StartupBox"
+                        Grid.Column="4"
+                        Margin="0,20,0,0"
+                        VerticalAlignment="Center"
+                        Content="开机自动启动" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <Border Padding="14"
+                CornerRadius="14"
+                Background="White"
+                BorderBrush="#DDE6F1"
+                BorderThickness="1">
+          <StackPanel Spacing="10">
+            <TextBlock Text="快捷键"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Foreground="#1C2739" />
+            <Grid ColumnDefinitions="180,*">
+              <TextBox x:Name="HotkeyBox"
+                       IsReadOnly="True"
+                       PlaceholderText="Alt+C" />
+              <TextBlock Grid.Column="1"
+                         Margin="12,0,0,0"
+                         VerticalAlignment="Center"
+                         Text="点击输入框后按组合键录入"
+                         FontSize="12"
+                         Foreground="#718096" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <Border Padding="14"
+                CornerRadius="14"
+                Background="White"
+                BorderBrush="#DDE6F1"
+                BorderThickness="1">
+          <StackPanel Spacing="10">
+            <TextBlock Text="关闭按钮行为"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Foreground="#1C2739" />
+            <StackPanel Orientation="Horizontal"
+                        Spacing="18">
+              <RadioButton x:Name="CloseMinimizeBox"
+                           GroupName="CloseAction"
+                           Content="最小化到托盘" />
+              <RadioButton x:Name="CloseExitBox"
+                           GroupName="CloseAction"
+                           Content="关闭程序" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <TextBlock x:Name="ErrorText"
+                   FontSize="12"
+                   Foreground="#C13830"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+
+      <StackPanel Grid.Row="2"
+                  Margin="0,10,0,0"
+                  Orientation="Horizontal"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Top"
+                  Spacing="10">
+        <Button Content="取消"
+                Click="CancelButton_Click" />
+        <Button Classes="primary"
+                Content="保存"
+                Click="SaveButton_Click" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

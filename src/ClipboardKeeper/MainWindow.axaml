@@ -1,0 +1,363 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ClipboardKeeper"
+        x:Class="ClipboardKeeper.MainWindow"
+        x:DataType="local:MainWindowViewModel"
+        Width="720"
+        Height="660"
+        MinWidth="620"
+        MinHeight="560"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        Title="ClipboardKeeper">
+  <Window.Resources>
+    <DataTemplate x:Key="HistoryItemTemplate"
+                  x:DataType="local:ClipboardHistoryItem">
+      <Border Classes="itemCard"
+              MinHeight="86"
+              Padding="14,12"
+              CornerRadius="12"
+              Background="#FFFFFF"
+              BorderBrush="#DDE6F1"
+              BorderThickness="1"
+              PointerEntered="HistoryItemCard_PointerEntered"
+              PointerExited="HistoryItemCard_PointerExited">
+        <Grid RowDefinitions="*,Auto"
+              ColumnDefinitions="Auto,Auto,*,Auto">
+          <Border Grid.RowSpan="2"
+                  Width="4"
+                  Margin="-4,0,10,0"
+                  CornerRadius="2"
+                  Background="#1769E0"
+                  IsVisible="{Binding IsPinned}"
+                  ToolTip.Tip="已置顶" />
+
+          <Border Grid.Column="1"
+                  Width="76"
+                  Height="54"
+                  Margin="0,0,12,0"
+                  CornerRadius="10"
+                  ClipToBounds="True"
+                  Background="#F4F7FB"
+                  BorderBrush="#DDE6F1"
+                  BorderThickness="1"
+                  IsVisible="{Binding IsImage}"
+                  PointerPressed="ImageThumbnail_PointerPressed"
+                  Cursor="Hand"
+                  ToolTip.Tip="点击预览">
+            <Image Source="{Binding ThumbnailImage}"
+                   Stretch="UniformToFill" />
+          </Border>
+
+          <StackPanel Grid.Column="2"
+                      Grid.Row="0"
+                      Spacing="3">
+            <TextBlock Text="{Binding Preview}"
+                       FontSize="13"
+                       FontWeight="Medium"
+                       Foreground="#1C2739"
+                       TextWrapping="Wrap"
+                       MaxLines="2"
+                       IsVisible="{Binding IsText}" />
+          </StackPanel>
+
+          <StackPanel Grid.Column="3"
+                      Margin="12,0,0,0"
+                      Orientation="Horizontal"
+                      Spacing="6"
+                      VerticalAlignment="Top">
+            <Button Classes="itemAction"
+                    Content="⧉"
+                    Command="{Binding $parent[Window].DataContext.CopyItemCommand}"
+                    CommandParameter="{Binding}"
+                    ToolTip.Tip="复制" />
+            <Button Classes="itemAction"
+                    Content="★"
+                    Command="{Binding $parent[Window].DataContext.TogglePinItemCommand}"
+                    CommandParameter="{Binding}"
+                    ToolTip.Tip="置顶/取消置顶" />
+            <Button Classes="itemAction dangerIcon"
+                    Content="×"
+                    Command="{Binding $parent[Window].DataContext.DeleteItemCommand}"
+                    CommandParameter="{Binding}"
+                    ToolTip.Tip="删除" />
+          </StackPanel>
+
+          <StackPanel Grid.Row="1"
+                      Grid.Column="2"
+                      Grid.ColumnSpan="2"
+                      Orientation="Horizontal"
+                      Spacing="12"
+                      IsVisible="{Binding IsText}">
+            <TextBlock Text="{Binding LastSeenLabel}"
+                       FontSize="11"
+                       Foreground="#718096" />
+            <TextBlock Text="{Binding SecondaryLabel}"
+                       FontSize="11"
+                       Foreground="#718096"
+                       TextTrimming="CharacterEllipsis"
+                       MaxWidth="360"
+                       IsVisible="{Binding HasSecondaryLabel}" />
+          </StackPanel>
+
+          <StackPanel Grid.Row="1"
+                      Grid.Column="1"
+                      Grid.ColumnSpan="2"
+                      Margin="0,10,0,0"
+                      Orientation="Horizontal"
+                      Spacing="10"
+                      IsVisible="{Binding IsImage}">
+            <TextBlock Text="{Binding LastSeenLabel}"
+                       FontSize="11"
+                       Foreground="#718096" />
+            <TextBlock Text="{Binding SecondaryLabel}"
+                       FontSize="11"
+                       Foreground="#718096"
+                       TextTrimming="CharacterEllipsis"
+                       MaxWidth="430" />
+          </StackPanel>
+        </Grid>
+      </Border>
+    </DataTemplate>
+  </Window.Resources>
+
+  <Window.Styles>
+    <Style Selector="TextBox">
+      <Setter Property="Foreground" Value="#1F334D" />
+      <Setter Property="BorderBrush" Value="#D6E0EC" />
+      <Setter Property="Background" Value="White" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="12,8" />
+    </Style>
+    <Style Selector="TextBox:focus">
+      <Setter Property="BorderBrush" Value="#1769E0" />
+    </Style>
+    <Style Selector="Button">
+      <Setter Property="MinHeight" Value="36" />
+      <Setter Property="Padding" Value="14,7" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Background" Value="#F8FAFC" />
+      <Setter Property="Foreground" Value="#1F334D" />
+      <Setter Property="BorderBrush" Value="#D6E0EC" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button:pointerover">
+      <Setter Property="Background" Value="#EEF6FF" />
+      <Setter Property="BorderBrush" Value="#AFC3DD" />
+    </Style>
+    <Style Selector="Button.icon">
+      <Setter Property="Width" Value="38" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="MinHeight" Value="34" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.itemAction">
+      <Setter Property="Width" Value="30" />
+      <Setter Property="Height" Value="30" />
+      <Setter Property="MinHeight" Value="30" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="Background" Value="#F8FAFC" />
+      <Setter Property="BorderBrush" Value="#C9D8EA" />
+    </Style>
+    <Style Selector="Button.itemAction:pointerover">
+      <Setter Property="Opacity" Value="1" />
+      <Setter Property="Background" Value="#E7F0FF" />
+      <Setter Property="BorderBrush" Value="#1769E0" />
+      <Setter Property="Foreground" Value="#1769E0" />
+    </Style>
+    <Style Selector="Button.dangerIcon:pointerover">
+      <Setter Property="Background" Value="#FFF1F0" />
+      <Setter Property="BorderBrush" Value="#F0C5C1" />
+      <Setter Property="Foreground" Value="#C13830" />
+    </Style>
+    <Style Selector="Button.close:pointerover">
+      <Setter Property="Background" Value="#FFF1F0" />
+      <Setter Property="BorderBrush" Value="#F0C5C1" />
+      <Setter Property="Foreground" Value="#C13830" />
+    </Style>
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#1769E0" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="BorderBrush" Value="#1769E0" />
+    </Style>
+    <Style Selector="Button.danger">
+      <Setter Property="Foreground" Value="#C13830" />
+      <Setter Property="BorderBrush" Value="#F0C5C1" />
+      <Setter Property="Background" Value="#FFF7F6" />
+    </Style>
+    <Style Selector="ListBox">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="ListBoxItem">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="0,0,0,10" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ListBoxItem:pointerover">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ListBoxItem:selected">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ListBoxItem:pointerover Border.itemCard">
+      <Setter Property="BorderBrush" Value="#1769E0" />
+      <Setter Property="Background" Value="#FBFDFF" />
+      <Setter Property="BoxShadow" Value="0 8 18 0 #1769E026" />
+    </Style>
+    <Style Selector="ListBoxItem:selected Border.itemCard">
+      <Setter Property="BorderBrush" Value="#7EADEB" />
+      <Setter Property="Background" Value="#F7FBFF" />
+    </Style>
+    <Style Selector="ListBoxItem:pointerover Button.itemAction">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="ListBox#HistoryList ScrollBar:vertical">
+      <Setter Property="Width" Value="0" />
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="MaxWidth" Value="0" />
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+    <Style Selector="ListBox#HistoryList ScrollBar:horizontal">
+      <Setter Property="Height" Value="0" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="MaxHeight" Value="0" />
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+  </Window.Styles>
+
+  <Border x:Name="Surface"
+          CornerRadius="18"
+          ClipToBounds="True"
+          BorderBrush="#D8E1EC"
+          BorderThickness="1"
+          BoxShadow="0 18 34 0 #2D17263B">
+    <Border.Background>
+      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#F8FBFF" Offset="0" />
+        <GradientStop Color="#E9F0F9" Offset="1" />
+      </LinearGradientBrush>
+    </Border.Background>
+
+    <Grid RowDefinitions="82,*">
+      <Grid x:Name="TitleBar"
+            Grid.Row="0"
+            ColumnDefinitions="54,*,164"
+            Margin="24,18,18,12"
+            Background="Transparent">
+        <Image x:Name="LogoImage"
+               Width="46"
+               Height="46"
+               Stretch="Uniform"
+               VerticalAlignment="Center" />
+
+        <StackPanel Grid.Column="1"
+                    Spacing="1"
+                    VerticalAlignment="Center">
+          <TextBlock Text="ClipboardKeeper"
+                     FontSize="22"
+                     FontWeight="SemiBold"
+                     Foreground="#1C2739" />
+          <TextBlock Text="{Binding StatusText}"
+                     FontSize="12"
+                     Foreground="#718096"
+                     TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8">
+          <Button Classes="icon"
+                  Click="SettingsButton_Click"
+                  Content="⚙"
+                  ToolTip.Tip="设置" />
+          <Button Classes="icon"
+                  Click="MinimizeButton_Click"
+                  Content="─"
+                  ToolTip.Tip="最小化" />
+          <Button Classes="icon close"
+                  Click="CloseButton_Click"
+                  Content="×"
+                  FontSize="18"
+                  ToolTip.Tip="关闭" />
+        </StackPanel>
+      </Grid>
+
+      <Border Grid.Row="1"
+              Margin="24,0,24,24"
+              Padding="16"
+              CornerRadius="18"
+              Background="White"
+              BorderBrush="#DDE6F1"
+              BorderThickness="1"
+              BoxShadow="0 8 18 0 #1217263B">
+        <Grid RowDefinitions="Auto,Auto,*">
+          <Grid ColumnDefinitions="*,Auto,10,Auto"
+                RowDefinitions="Auto,Auto">
+            <TextBlock Text="历史记录"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="#1C2739" />
+            <TextBlock Grid.Column="1"
+                       Text="{Binding TotalCount, StringFormat='{}{0} 条'}"
+                       FontSize="13"
+                       Foreground="#718096"
+                       VerticalAlignment="Center" />
+            <Button Grid.Column="3"
+                    Classes="danger"
+                    Content="清空非置顶"
+                    Command="{Binding ClearUnpinnedCommand}" />
+            <TextBlock Grid.Row="1"
+                       Grid.ColumnSpan="4"
+                       Margin="0,3,0,0"
+                       Text="双击条目复制回系统剪切板"
+                       FontSize="12"
+                       Foreground="#718096" />
+          </Grid>
+
+          <Grid Grid.Row="1"
+                Margin="0,14,0,14"
+                ColumnDefinitions="*">
+            <TextBox Grid.Column="0"
+                     PlaceholderText="搜索剪切板文本"
+                     Text="{Binding SearchText, Mode=TwoWay}" />
+          </Grid>
+
+          <ListBox x:Name="HistoryList"
+                   Grid.Row="2"
+                   ItemsSource="{Binding Items}"
+                   SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                   ItemTemplate="{StaticResource HistoryItemTemplate}"
+                   ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                   DoubleTapped="HistoryList_DoubleTapped">
+            <ListBox.ItemsPanel>
+              <ItemsPanelTemplate>
+                <VirtualizingStackPanel />
+              </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.Styles>
+              <Style Selector="ScrollViewer">
+                <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
+                <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+              </Style>
+            </ListBox.Styles>
+          </ListBox>
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
+</Window>
