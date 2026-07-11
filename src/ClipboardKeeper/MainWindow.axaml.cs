@@ -101,7 +101,7 @@ public partial class MainWindow : Window
         }
 
         var dialog = new SettingsWindow(_viewModel.CreateSettingsSnapshot());
-        var result = await dialog.ShowDialog<AppSettings?>(this);
+        var result = await ShowWithModalBackdropAsync(() => dialog.ShowDialog<AppSettings?>(this));
         if (result is not null)
         {
             await _viewModel.ApplySettingsAsync(result);
@@ -141,7 +141,39 @@ public partial class MainWindow : Window
 
         e.Handled = true;
         var preview = new ImagePreviewWindow(item.ImagePath);
-        await preview.ShowDialog(this);
+        await ShowWithModalBackdropAsync(() => preview.ShowDialog(this));
+    }
+
+    private async Task<T?> ShowWithModalBackdropAsync<T>(Func<Task<T?>> showDialog)
+    {
+        SetModalBackdropVisible(true);
+        try
+        {
+            return await showDialog();
+        }
+        finally
+        {
+            SetModalBackdropVisible(false);
+        }
+    }
+
+    private async Task ShowWithModalBackdropAsync(Func<Task> showDialog)
+    {
+        SetModalBackdropVisible(true);
+        try
+        {
+            await showDialog();
+        }
+        finally
+        {
+            SetModalBackdropVisible(false);
+        }
+    }
+
+    private void SetModalBackdropVisible(bool isVisible)
+    {
+        ModalScrim.IsVisible = isVisible;
+        Surface.Opacity = isVisible ? 0.68 : 1;
     }
 
     private void HistoryItemCard_PointerEntered(object? sender, PointerEventArgs e)

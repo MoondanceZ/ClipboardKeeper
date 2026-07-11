@@ -68,17 +68,17 @@
                       VerticalAlignment="Top">
             <Button Classes="itemAction"
                     Content="⧉"
-                    Command="{Binding $parent[Window].DataContext.CopyItemCommand}"
+                    Command="{ReflectionBinding $parent[Window].DataContext.CopyItemCommand}"
                     CommandParameter="{Binding}"
                     ToolTip.Tip="复制" />
             <Button Classes="itemAction"
                     Content="★"
-                    Command="{Binding $parent[Window].DataContext.TogglePinItemCommand}"
+                    Command="{ReflectionBinding $parent[Window].DataContext.TogglePinItemCommand}"
                     CommandParameter="{Binding}"
                     ToolTip.Tip="置顶/取消置顶" />
             <Button Classes="itemAction dangerIcon"
                     Content="×"
-                    Command="{Binding $parent[Window].DataContext.DeleteItemCommand}"
+                    Command="{ReflectionBinding $parent[Window].DataContext.DeleteItemCommand}"
                     CommandParameter="{Binding}"
                     ToolTip.Tip="删除" />
           </StackPanel>
@@ -238,126 +238,136 @@
     </Style>
   </Window.Styles>
 
-  <Border x:Name="Surface"
-          CornerRadius="18"
-          ClipToBounds="True"
-          BorderBrush="#D8E1EC"
-          BorderThickness="1"
-          BoxShadow="0 18 34 0 #2D17263B">
-    <Border.Background>
-      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-        <GradientStop Color="#F8FBFF" Offset="0" />
-        <GradientStop Color="#E9F0F9" Offset="1" />
-      </LinearGradientBrush>
-    </Border.Background>
+  <Grid>
+    <Border x:Name="Surface"
+            CornerRadius="18"
+            ClipToBounds="True"
+            BorderBrush="#D8E1EC"
+            BorderThickness="1"
+            BoxShadow="0 18 34 0 #2D17263B">
+      <Border.Background>
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Color="#F8FBFF" Offset="0" />
+          <GradientStop Color="#E9F0F9" Offset="1" />
+        </LinearGradientBrush>
+      </Border.Background>
 
-    <Grid RowDefinitions="82,*">
-      <Grid x:Name="TitleBar"
-            Grid.Row="0"
-            ColumnDefinitions="54,*,164"
-            Margin="24,18,18,12"
-            Background="Transparent">
-        <Image x:Name="LogoImage"
-               Width="46"
-               Height="46"
-               Stretch="Uniform"
-               VerticalAlignment="Center" />
+      <Grid RowDefinitions="82,*">
+        <Grid x:Name="TitleBar"
+              Grid.Row="0"
+              ColumnDefinitions="54,*,164"
+              Margin="24,18,18,12"
+              Background="Transparent">
+          <Image x:Name="LogoImage"
+                 Width="46"
+                 Height="46"
+                 Stretch="Uniform"
+                 VerticalAlignment="Center" />
 
-        <StackPanel Grid.Column="1"
-                    Spacing="1"
-                    VerticalAlignment="Center">
-          <TextBlock Text="ClipboardKeeper"
-                     FontSize="22"
-                     FontWeight="SemiBold"
-                     Foreground="#1C2739" />
-          <TextBlock Text="{Binding StatusText}"
-                     FontSize="12"
-                     Foreground="#718096"
-                     TextTrimming="CharacterEllipsis" />
-        </StackPanel>
-
-        <StackPanel Grid.Column="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Spacing="8">
-          <Button Classes="icon"
-                  Click="SettingsButton_Click"
-                  Content="⚙"
-                  ToolTip.Tip="设置" />
-          <Button Classes="icon"
-                  Click="MinimizeButton_Click"
-                  Content="─"
-                  ToolTip.Tip="最小化" />
-          <Button Classes="icon close"
-                  Click="CloseButton_Click"
-                  Content="×"
-                  FontSize="18"
-                  ToolTip.Tip="关闭" />
-        </StackPanel>
-      </Grid>
-
-      <Border Grid.Row="1"
-              Margin="24,0,24,24"
-              Padding="16"
-              CornerRadius="18"
-              Background="White"
-              BorderBrush="#DDE6F1"
-              BorderThickness="1"
-              BoxShadow="0 8 18 0 #1217263B">
-        <Grid RowDefinitions="Auto,Auto,*">
-          <Grid ColumnDefinitions="*,Auto,10,Auto"
-                RowDefinitions="Auto,Auto">
-            <TextBlock Text="历史记录"
-                       FontSize="18"
+          <StackPanel Grid.Column="1"
+                      Spacing="1"
+                      VerticalAlignment="Center">
+            <TextBlock Text="ClipboardKeeper"
+                       FontSize="22"
                        FontWeight="SemiBold"
                        Foreground="#1C2739" />
-            <TextBlock Grid.Column="1"
-                       Text="{Binding TotalCount, StringFormat='{}{0} 条'}"
-                       FontSize="13"
-                       Foreground="#718096"
-                       VerticalAlignment="Center" />
-            <Button Grid.Column="3"
-                    Classes="danger"
-                    Content="清空非置顶"
-                    Command="{Binding ClearUnpinnedCommand}" />
-            <TextBlock Grid.Row="1"
-                       Grid.ColumnSpan="4"
-                       Margin="0,3,0,0"
-                       Text="双击条目复制回系统剪切板"
+            <TextBlock Text="{Binding StatusText}"
                        FontSize="12"
-                       Foreground="#718096" />
-          </Grid>
+                       Foreground="#718096"
+                       TextTrimming="CharacterEllipsis" />
+          </StackPanel>
 
-          <Grid Grid.Row="1"
-                Margin="0,14,0,14"
-                ColumnDefinitions="*">
-            <TextBox Grid.Column="0"
-                     PlaceholderText="搜索剪切板文本"
-                     Text="{Binding SearchText, Mode=TwoWay}" />
-          </Grid>
-
-          <ListBox x:Name="HistoryList"
-                   Grid.Row="2"
-                   ItemsSource="{Binding Items}"
-                   SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-                   ItemTemplate="{StaticResource HistoryItemTemplate}"
-                   ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                   DoubleTapped="HistoryList_DoubleTapped">
-            <ListBox.ItemsPanel>
-              <ItemsPanelTemplate>
-                <VirtualizingStackPanel />
-              </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
-            <ListBox.Styles>
-              <Style Selector="ScrollViewer">
-                <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
-                <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
-              </Style>
-            </ListBox.Styles>
-          </ListBox>
+          <StackPanel Grid.Column="2"
+                      Orientation="Horizontal"
+                      HorizontalAlignment="Right"
+                      Spacing="8">
+            <Button Classes="icon"
+                    Click="SettingsButton_Click"
+                    Content="⚙"
+                    ToolTip.Tip="设置" />
+            <Button Classes="icon"
+                    Click="MinimizeButton_Click"
+                    Content="─"
+                    ToolTip.Tip="最小化" />
+            <Button Classes="icon close"
+                    Click="CloseButton_Click"
+                    Content="×"
+                    FontSize="18"
+                    ToolTip.Tip="关闭" />
+          </StackPanel>
         </Grid>
-      </Border>
-    </Grid>
-  </Border>
+
+        <Border Grid.Row="1"
+                Margin="24,0,24,24"
+                Padding="16"
+                CornerRadius="18"
+                Background="White"
+                BorderBrush="#DDE6F1"
+                BorderThickness="1"
+                BoxShadow="0 8 18 0 #1217263B">
+          <Grid RowDefinitions="Auto,Auto,*">
+            <Grid ColumnDefinitions="*,Auto,10,Auto"
+                  RowDefinitions="Auto,Auto">
+              <TextBlock Text="历史记录"
+                         FontSize="18"
+                         FontWeight="SemiBold"
+                         Foreground="#1C2739" />
+              <TextBlock Grid.Column="1"
+                         Text="{Binding TotalCount, StringFormat='{}{0} 条'}"
+                         FontSize="13"
+                         Foreground="#718096"
+                         VerticalAlignment="Center" />
+              <Button Grid.Column="3"
+                      Classes="danger"
+                      Content="清空非置顶"
+                      Command="{Binding ClearUnpinnedCommand}" />
+              <TextBlock Grid.Row="1"
+                         Grid.ColumnSpan="4"
+                         Margin="0,3,0,0"
+                         Text="双击条目复制回系统剪切板"
+                         FontSize="12"
+                         Foreground="#718096" />
+            </Grid>
+
+            <Grid Grid.Row="1"
+                  Margin="0,14,0,14"
+                  ColumnDefinitions="*">
+              <TextBox Grid.Column="0"
+                       PlaceholderText="搜索剪切板文本"
+                       Text="{Binding SearchText, Mode=TwoWay}" />
+            </Grid>
+
+            <ListBox x:Name="HistoryList"
+                     Grid.Row="2"
+                     ItemsSource="{Binding Items}"
+                     SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                     ItemTemplate="{StaticResource HistoryItemTemplate}"
+                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     DoubleTapped="HistoryList_DoubleTapped">
+              <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+              </ListBox.ItemsPanel>
+              <ListBox.Styles>
+                <Style Selector="ScrollViewer">
+                  <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
+                  <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+                </Style>
+              </ListBox.Styles>
+            </ListBox>
+          </Grid>
+        </Border>
+      </Grid>
+    </Border>
+
+    <Border x:Name="ModalScrim"
+            IsVisible="False"
+            IsHitTestVisible="True"
+            CornerRadius="18"
+            Background="#B8F6FAFF"
+            BorderBrush="#80FFFFFF"
+            BorderThickness="1" />
+  </Grid>
 </Window>
