@@ -68,18 +68,15 @@
                       VerticalAlignment="Top">
             <Button Classes="itemAction"
                     Content="⧉"
-                    Command="{ReflectionBinding $parent[Window].DataContext.CopyItemCommand}"
-                    CommandParameter="{Binding}"
+                    Click="CopyItemButton_Click"
                     ToolTip.Tip="复制" />
             <Button Classes="itemAction"
                     Content="★"
-                    Command="{ReflectionBinding $parent[Window].DataContext.TogglePinItemCommand}"
-                    CommandParameter="{Binding}"
+                    Click="TogglePinItemButton_Click"
                     ToolTip.Tip="置顶/取消置顶" />
             <Button Classes="itemAction dangerIcon"
                     Content="×"
-                    Command="{ReflectionBinding $parent[Window].DataContext.DeleteItemCommand}"
-                    CommandParameter="{Binding}"
+                    Click="DeleteItemButton_Click"
                     ToolTip.Tip="删除" />
           </StackPanel>
 

@@ -130,6 +130,30 @@ public partial class MainWindow : Window
         }
     }
 
+    private void CopyItemButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Control { DataContext: ClipboardHistoryItem item })
+        {
+            _viewModel?.CopyItemCommand.Execute(item);
+        }
+    }
+
+    private void TogglePinItemButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Control { DataContext: ClipboardHistoryItem item })
+        {
+            _viewModel?.TogglePinItemCommand.Execute(item);
+        }
+    }
+
+    private void DeleteItemButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Control { DataContext: ClipboardHistoryItem item })
+        {
+            _viewModel?.DeleteItemCommand.Execute(item);
+        }
+    }
+
     private async void ImageThumbnail_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (sender is not Control { DataContext: ClipboardHistoryItem item }
