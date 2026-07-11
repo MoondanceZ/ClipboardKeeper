@@ -1,5 +1,7 @@
 # ClipboardKeeper
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 ClipboardKeeper is a lightweight Windows clipboard history app built with Avalonia. It keeps local text and optional image clipboard history, supports search and pinning, and can live quietly in the system tray.
 
 ## Features
