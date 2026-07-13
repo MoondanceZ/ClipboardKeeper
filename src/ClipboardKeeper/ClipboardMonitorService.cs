@@ -16,6 +16,7 @@ public sealed class ClipboardMonitorService
     private readonly TimeSpan _interval = TimeSpan.FromMilliseconds(900);
     private string? _lastHash;
     private string? _lastImageHash;
+    private int _suppressedImageCaptures;
     private CancellationTokenSource? _cts;
 
     public ClipboardMonitorService(IClipboard clipboard, Func<bool> shouldSaveImages)
@@ -47,6 +48,11 @@ public sealed class ClipboardMonitorService
         _cts = null;
     }
 
+    public void SuppressNextImageCapture()
+    {
+        Interlocked.Exchange(ref _suppressedImageCaptures, 1);
+    }
+
     private async Task RunAsync(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
@@ -76,6 +82,11 @@ public sealed class ClipboardMonitorService
                         if (!string.Equals(hash, _lastImageHash, StringComparison.Ordinal))
                         {
                             _lastImageHash = hash;
+                            if (Interlocked.CompareExchange(ref _suppressedImageCaptures, 0, 1) == 1)
+                            {
+                                continue;
+                            }
+
                             ImageCaptured?.Invoke(this, new ClipboardImageCapture(bytes, hash));
                         }
                     }

@@ -169,6 +169,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             var bitmap = new Bitmap(item.ImagePath);
             await _clipboard.SetBitmapAsync(bitmap);
+            _monitor.SuppressNextImageCapture();
         }
         else
         {
