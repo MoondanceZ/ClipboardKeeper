@@ -7,7 +7,7 @@ namespace ClipboardKeeper;
 
 public static class ThumbnailCache
 {
-    private const int MaxCachedThumbnails = 128;
+    private const int MaxCachedThumbnails = 48;
     private const int DecodeWidth = 160;
     private static readonly object Gate = new();
     private static readonly Dictionary<string, LinkedListNode<Entry>> Entries = new(StringComparer.OrdinalIgnoreCase);

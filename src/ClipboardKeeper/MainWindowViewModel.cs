@@ -167,7 +167,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         if (item.IsImage && !string.IsNullOrWhiteSpace(item.ImagePath) && File.Exists(item.ImagePath))
         {
-            var bitmap = new Bitmap(item.ImagePath);
+            using var bitmap = new Bitmap(item.ImagePath);
             await _clipboard.SetBitmapAsync(bitmap);
             _monitor.SuppressNextImageCapture();
         }

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ public sealed class ClipboardMonitorService
     private readonly IClipboard _clipboard;
     private readonly Func<bool> _shouldSaveImages;
     private readonly TimeSpan _interval = TimeSpan.FromMilliseconds(900);
+    private uint _lastClipboardSequence;
     private string? _lastHash;
     private string? _lastImageHash;
     private int _suppressedImageCaptures;
@@ -59,6 +61,18 @@ public sealed class ClipboardMonitorService
         {
             try
             {
+                var clipboardSequence = GetClipboardSequenceNumber();
+                if (clipboardSequence != 0 && clipboardSequence == _lastClipboardSequence)
+                {
+                    await DelayNextPollAsync(cancellationToken);
+                    continue;
+                }
+
+                if (clipboardSequence != 0)
+                {
+                    _lastClipboardSequence = clipboardSequence;
+                }
+
                 var text = await Dispatcher.UIThread.InvokeAsync(() => _clipboard.TryGetTextAsync());
                 if (ClipboardHistoryStore.IsAcceptedText(text))
                 {
@@ -75,19 +89,26 @@ public sealed class ClipboardMonitorService
                     var bitmap = await Dispatcher.UIThread.InvokeAsync(() => _clipboard.TryGetBitmapAsync());
                     if (bitmap is not null)
                     {
-                        await using var stream = new MemoryStream();
-                        bitmap.Save(stream);
-                        var bytes = stream.ToArray();
-                        var hash = Convert.ToHexString(SHA256.HashData(bytes));
-                        if (!string.Equals(hash, _lastImageHash, StringComparison.Ordinal))
+                        try
                         {
-                            _lastImageHash = hash;
-                            if (Interlocked.CompareExchange(ref _suppressedImageCaptures, 0, 1) == 1)
+                            await using var stream = new MemoryStream();
+                            bitmap.Save(stream);
+                            var bytes = stream.ToArray();
+                            var hash = Convert.ToHexString(SHA256.HashData(bytes));
+                            if (!string.Equals(hash, _lastImageHash, StringComparison.Ordinal))
                             {
-                                continue;
-                            }
+                                _lastImageHash = hash;
+                                if (Interlocked.CompareExchange(ref _suppressedImageCaptures, 0, 1) == 1)
+                                {
+                                    continue;
+                                }
 
-                            ImageCaptured?.Invoke(this, new ClipboardImageCapture(bytes, hash));
+                                ImageCaptured?.Invoke(this, new ClipboardImageCapture(bytes, hash));
+                            }
+                        }
+                        finally
+                        {
+                            bitmap.Dispose();
                         }
                     }
                 }
@@ -97,16 +118,23 @@ public sealed class ClipboardMonitorService
                 // Clipboard can be temporarily locked by another process; the next poll usually succeeds.
             }
 
-            try
-            {
-                await Task.Delay(_interval, cancellationToken);
-            }
-            catch (TaskCanceledException)
-            {
-                return;
-            }
+            await DelayNextPollAsync(cancellationToken);
         }
     }
+
+    private async Task DelayNextPollAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(_interval, cancellationToken);
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
+
+    [DllImport("user32.dll")]
+    private static extern uint GetClipboardSequenceNumber();
 }
 
 public sealed record ClipboardImageCapture(byte[] PngBytes, string ContentHash);
