@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -7,6 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 
 namespace ClipboardKeeper;
@@ -355,6 +357,18 @@ public partial class MainWindow : Window
         Show();
         WindowState = WindowState.Normal;
         Activate();
+        ScrollHistoryToTop();
+    }
+
+    private void ScrollHistoryToTop()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (_viewModel?.Items.FirstOrDefault() is { } firstItem)
+            {
+                HistoryList.ScrollIntoView(firstItem);
+            }
+        }, DispatcherPriority.Loaded);
     }
 
     private void ExitApplication()
