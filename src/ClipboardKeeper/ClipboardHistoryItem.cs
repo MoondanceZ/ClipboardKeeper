@@ -7,8 +7,13 @@ namespace ClipboardKeeper;
 
 public sealed partial class ClipboardHistoryItem : ObservableObject
 {
-    [ObservableProperty]
     private bool _isPinned;
+
+    public bool IsPinned
+    {
+        get => _isPinned;
+        set => SetProperty(ref _isPinned, value);
+    }
 
     public Guid Id { get; init; } = Guid.NewGuid();
 
