@@ -191,8 +191,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
             return;
         }
 
+        var wasPinned = item.IsPinned;
+        var nextPinnedItem = Items.SkipWhile(candidate => candidate != item).Skip(1).FirstOrDefault();
         item.IsPinned = !item.IsPinned;
-        SelectedItem = item;
+        SelectedItem = wasPinned ? nextPinnedItem : item;
         SortItems();
         await PersistAsync();
         StatusText = item.IsPinned ? "已置顶当前条目" : "已取消置顶";
