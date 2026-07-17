@@ -3,8 +3,10 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Input.Platform;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -15,6 +17,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private readonly AppSettingsService _settingsService = new();
     private readonly StartupService _startupService = new();
     private readonly IClipboard _clipboard;
+    private readonly IStorageProvider? _storageProvider;
     private readonly ClipboardMonitorService _monitor;
     private readonly ObservableCollection<ClipboardHistoryItem> _allItems = [];
     private ClipboardHistoryStore _store = new(new AppSettings());
@@ -36,9 +39,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private int _maxHistoryItems = ClipboardHistoryStore.DefaultMaxItems;
 
-    public MainWindowViewModel(IClipboard clipboard)
+    public MainWindowViewModel(IClipboard clipboard, IStorageProvider? storageProvider = null)
     {
         _clipboard = clipboard;
+        _storageProvider = storageProvider;
         _monitor = new ClipboardMonitorService(clipboard, () => _settings.SaveImages);
         _monitor.TextCaptured += async (_, text) => await CaptureTextAsync(text);
         _monitor.ImageCaptured += async (_, image) => await CaptureImageAsync(image);
@@ -165,11 +169,12 @@ public sealed partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        if (item.IsImage && !string.IsNullOrWhiteSpace(item.ImagePath) && File.Exists(item.ImagePath))
+        if (item.IsImage)
         {
-            using var bitmap = new Bitmap(item.ImagePath);
-            await _clipboard.SetBitmapAsync(bitmap);
-            _monitor.SuppressNextImageCapture();
+            if (!await CopyImageItemAsync(item))
+            {
+                return;
+            }
         }
         else
         {
@@ -181,6 +186,36 @@ public sealed partial class MainWindowViewModel : ObservableObject
         SortItems();
         await PersistAsync();
         StatusText = item.IsImage ? "已复制图片回系统剪切板" : "已复制文本回系统剪切板";
+    }
+
+    private async Task<bool> CopyImageItemAsync(ClipboardHistoryItem item)
+    {
+        if (string.IsNullOrWhiteSpace(item.ImagePath) || !File.Exists(item.ImagePath))
+        {
+            StatusText = "图片文件不存在，无法复制";
+            return false;
+        }
+
+        using var bitmap = new Bitmap(item.ImagePath);
+        if (_storageProvider is not null)
+        {
+            var storageFile = await _storageProvider.TryGetFileFromPathAsync(item.ImagePath);
+            if (storageFile is not null)
+            {
+                var dataTransfer = new DataTransfer();
+                var dataItem = new DataTransferItem();
+                dataItem.SetBitmap(bitmap);
+                dataItem.SetFile(storageFile);
+                dataTransfer.Add(dataItem);
+                await _clipboard.SetDataAsync(dataTransfer);
+                _monitor.SuppressNextImageCapture();
+                return true;
+            }
+        }
+
+        await _clipboard.SetBitmapAsync(bitmap);
+        _monitor.SuppressNextImageCapture();
+        return true;
     }
 
     [RelayCommand]

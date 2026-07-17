@@ -58,13 +58,14 @@ public partial class MainWindow : Window
     private async void MainWindow_Loaded(object? sender, RoutedEventArgs e)
     {
         Loaded -= MainWindow_Loaded;
-        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        var topLevel = TopLevel.GetTopLevel(this);
+        var clipboard = topLevel?.Clipboard;
         if (clipboard is null)
         {
             return;
         }
 
-        _viewModel = new MainWindowViewModel(clipboard);
+        _viewModel = new MainWindowViewModel(clipboard, topLevel?.StorageProvider);
         DataContext = _viewModel;
         await _viewModel.InitializeAsync();
         RegisterShowWindowHotkey();
